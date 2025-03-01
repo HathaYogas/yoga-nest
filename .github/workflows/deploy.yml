@@ -4,7 +4,7 @@ name: Deploy to EC2
 # 워크플로우가 실행되는 조건을 정의합니다.
 on:
   push:
-    branches: [ main, develop ]  # main 브랜치에 push가 발생할 때만 워크플로우를 실행합니다.
+    branches: [ main ]  # main 브랜치에 push가 발생할 때만 워크플로우를 실행합니다.
 
 # 워크플로우에서 실행할 작업(jobs)을 정의합니다.
 jobs:
@@ -46,5 +46,5 @@ jobs:
             git pull
             npm ci 
             npm run build
-            pm2 restart yoga-nest || pm2 start dist/main.js --name "yoga-nest"  
+            pm2 restart yoga-nest || pm2 start dist/main.js --name "yoga-nest"
           # PM2로 애플리케이션을 재시작하거나 시작합니다.
