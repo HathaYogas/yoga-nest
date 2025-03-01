@@ -1,0 +1,47 @@
+# 워크플로우의 이름을 "Deploy to EC2"로 설정합니다.
+name: Deploy to EC2
+
+# 워크플로우가 실행되는 조건을 정의합니다.
+on:
+  push:
+    branches: [ main ]  # main 브랜치에 push가 발생할 때만 워크플로우를 실행합니다.
+
+# 워크플로우에서 실행할 작업(jobs)을 정의합니다.
+jobs:
+  # "deploy"라는 이름의 작업을 정의합니다.
+  deploy:
+    # 이 작업은 GitHub에서 제공하는 최신 Ubuntu 환경에서 실행됩니다.
+    runs-on: ubuntu-latest
+    # 작업에서 실행할 단계(steps)들을 순서대로 정의합니다.
+    steps:
+      # GitHub 리포지토리의 코드를 작업 환경으로 체크아웃(가져오기)합니다.
+      - uses: actions/checkout@v3
+      
+      # Node.js 환경을 설정합니다.
+      - name: Setup Node.js
+        uses: actions/setup-node@v3  # Node.js 설치를 위한 공식 GitHub Action
+        with:
+          node-version: '22'  # Node.js 버전 22를 사용합니다.
+      
+      # 프로젝트 의존성을 설치합니다.
+      - name: Install dependencies
+        run: npm ci  # package-lock.json에 명시된 정확한 버전을 설치합니다.
+      
+      # 프로젝트를 빌드합니다.
+      - name: Build project
+        run: npm run build  # package.json에 정의된 build 스크립트를 실행합니다.
+      
+      # 빌드된 프로젝트를 EC2 서버에 배포합니다.
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master  # SSH를 통해 원격 명령을 실행하기 위한 GitHub Action
+        with:
+          host: ${{ secrets.HOST }}  # GitHub 리포지토리에 저장된 EC2 호스트 IP 주소
+          username: ec2-user  # EC2 인스턴스의 사용자 이름 (Amazon Linux의 기본값)
+          key: ${{ secrets.SSH_PRIVATE_KEY }}  # GitHub 리포지토리에 저장된 SSH 개인 키
+          script: |  # EC2 인스턴스에서 실행할 명령어들 (여러 줄 명령어를 파이프(|)로 정의)
+            cd ~/app  
+            git pull
+            npm ci 
+            npm run build
+            pm2 restart nest-app || pm2 start dist/main.js --name "yoga-nest"  
+          # PM2로 애플리케이션을 재시작하거나 시작합니다.
