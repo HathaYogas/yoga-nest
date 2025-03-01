@@ -38,6 +38,7 @@ jobs:
           host: ${{ secrets.HOST }}  # GitHub 리포지토리에 저장된 EC2 호스트 IP 주소
           username: ec2-user  # EC2 인스턴스의 사용자 이름 (Amazon Linux의 기본값)
           key: ${{ secrets.SSH_PRIVATE_KEY }}  # GitHub 리포지토리에 저장된 SSH 개인 키
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}  # 비밀번호를 위한 새 시크릿 추가
           script: |  # EC2 인스턴스에서 실행할 명령어들 (여러 줄 명령어를 파이프(|)로 정의)
             cd ~/app  
             git pull
