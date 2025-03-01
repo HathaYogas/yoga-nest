@@ -41,8 +41,10 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}  # 비밀번호를 위한 새 시크릿 추가
           script: |  # EC2 인스턴스에서 실행할 명령어들 (여러 줄 명령어를 파이프(|)로 정의)
             cd ~/app/yoga-nest  
+            git fetch 
+            git checkout develop 
             git pull
             npm ci 
             npm run build
-            pm2 restart nest-app || pm2 start dist/main.js --name "yoga-nest"  
+            pm2 restart yoga-nest || pm2 start dist/main.js --name "yoga-nest"  
           # PM2로 애플리케이션을 재시작하거나 시작합니다.
