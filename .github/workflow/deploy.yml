@@ -4,7 +4,7 @@ name: Deploy to EC2
 # 워크플로우가 실행되는 조건을 정의합니다.
 on:
   push:
-    branches: [ main, feat/cicd ]  # main 브랜치에 push가 발생할 때만 워크플로우를 실행합니다.
+    branches: [ main, develop ]  # main 브랜치에 push가 발생할 때만 워크플로우를 실행합니다.
 
 # 워크플로우에서 실행할 작업(jobs)을 정의합니다.
 jobs:
