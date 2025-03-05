@@ -43,7 +43,7 @@ jobs:
             cd ~/app/yoga-nest  
             git fetch 
             git checkout develop 
-            git pull
+            git pull origin develop
             npm ci 
             npm run build
             pm2 restart yoga-nest || pm2 start dist/main.js --name "yoga-nest"
