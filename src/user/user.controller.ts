@@ -7,20 +7,6 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @Post()
-  // login(@Body() loginDto: LoginDto) {
-  //   const email = loginDto.email;
-  //   console.log(email);
-  //   return email;
-  // }
-
-  // @Post('join')
-  // join(@Body() joinDto: JoinDto) {
-  //   const email = joinDto.email;
-  //   console.log(email);
-  //   return email;
-  // }
-
   @Post()
   async login(@Body() loginDto: LoginDto) {
     console.log('로그인 요청:', loginDto.email);
