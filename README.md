@@ -25,7 +25,7 @@ $ npm run start:dev
 http://localhost:3000/api-docs
 ```
 
-## To-Do
+## To-Dos
 
 [ ] Users
 
