@@ -1,0 +1,57 @@
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcryptjs';
+import { Model } from 'mongoose';
+import { JoinDto } from './join.dto';
+import { LoginDto } from './login.dto';
+import { User } from './user.schema';
+
+@Injectable()
+export class UserService {
+  constructor(
+    @InjectModel(User.name)
+    private userModel: Model<User>,
+  ) {}
+
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+
+    const user = await this.userModel.findOne({
+      email: email,
+    });
+
+    if (!user) {
+      throw new NotFoundException('이메일과 비밀번호를 확인해 주세요.');
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+    }
+    return user;
+  }
+
+  async join(joinDto: JoinDto) {
+    try {
+      console.log('회원가입 시도:', joinDto); // 로깅 추가
+
+      // bcrypt로 비밀번호 암호화 하기
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(joinDto.password, salt);
+
+      const joinUser = new this.userModel({ ...joinDto, password: hash });
+      const savedUser = await joinUser.save();
+
+      console.log('회원가입 성공:', savedUser._id); // 성공 로깅
+      return savedUser; // 저장된 사용자 데이터 반환
+    } catch (error) {
+      console.error('회원가입 실패:', error); // 오류 로깅
+      throw error;
+    }
+  }
+}
