@@ -16,7 +16,7 @@ async function bootstrap() {
     .setDescription('Yoga Backend')
     .setVersion('0.0.1')
     .addServer('http://localhost:3000/', 'Local environment')
-    .addServer('http://51.20.193.52:3000/', 'Staging')
+    .addServer('http://3.39.231.119:3000/', 'Staging')
     // .addServer('https://production.yourapi.com/', 'Production')
     // .addTag('Your API Tag')
     .build();
