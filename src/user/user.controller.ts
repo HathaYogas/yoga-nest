@@ -18,6 +18,7 @@ export class UserController {
   @Post('join')
   async join(@Body() joinDto: JoinDto) {
     console.log('회원가입 요청:', joinDto.email);
+
     // 서비스 메서드 호출
     const result = await this.userService.join(joinDto);
     return {

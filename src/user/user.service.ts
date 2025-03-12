@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { JoinDto } from './join.dto';
 import { LoginDto } from './login.dto';
@@ -17,11 +22,16 @@ export class UserService {
 
     const user = await this.userModel.findOne({
       email: email,
-      password: password,
     });
 
     if (!user) {
       throw new NotFoundException('이메일과 비밀번호를 확인해 주세요.');
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
     }
     return user;
   }
@@ -30,7 +40,11 @@ export class UserService {
     try {
       console.log('회원가입 시도:', joinDto); // 로깅 추가
 
-      const joinUser = new this.userModel(joinDto);
+      // bcrypt로 비밀번호 암호화 하기
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(joinDto.password, salt);
+
+      const joinUser = new this.userModel({ ...joinDto, password: hash });
       const savedUser = await joinUser.save();
 
       console.log('회원가입 성공:', savedUser._id); // 성공 로깅
