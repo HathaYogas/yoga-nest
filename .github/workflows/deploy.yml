@@ -25,6 +25,7 @@ jobs:
       
       # 프로젝트 의존성을 설치합니다.
       - name: Install dependencies
+        run : npm i
         run: npm ci  # package-lock.json에 명시된 정확한 버전을 설치합니다.
       
       # 프로젝트를 빌드합니다.
