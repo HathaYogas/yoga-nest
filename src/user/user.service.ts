@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import {
   Injectable,
   NotFoundException,
@@ -15,6 +16,7 @@ export class UserService {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<User>,
+    private readonly mailerService: MailerService,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -38,19 +40,65 @@ export class UserService {
 
   async join(joinDto: JoinDto) {
     try {
-      console.log('회원가입 시도:', joinDto); // 로깅 추가
+      console.log('회원가입 시도:', joinDto);
 
-      // bcrypt로 비밀번호 암호화 하기
+      const user = await this.userModel.findOne({
+        email: joinDto.email,
+      });
+      if (user) {
+        throw new NotFoundException('이미 가입된 이메일입니다.');
+      }
+
+      // bcrypt로 비밀번호 암호화
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(joinDto.password, salt);
 
       const joinUser = new this.userModel({ ...joinDto, password: hash });
       const savedUser = await joinUser.save();
 
-      console.log('회원가입 성공:', savedUser._id); // 성공 로깅
+      console.log('회원가입 성공:', savedUser._id);
       return savedUser; // 저장된 사용자 데이터 반환
     } catch (error) {
-      console.error('회원가입 실패:', error); // 오류 로깅
+      console.error('회원가입 실패:', error);
+      throw error;
+    }
+  }
+
+  async emailAuth() {
+    await this.mailerService
+      .sendMail({
+        // 이메일 전송 정보
+        to: 'hi_cookie@nate.com',
+        subject: 'Test',
+        text: '테스트',
+
+        // 이메일 템플릿 파일
+        template: 'email-auth',
+
+        // 동적으로 들어갈 변수 정의
+        context: {
+          code: 'cf1a3f828287',
+          username: 'Yoga',
+        },
+      })
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  async emailValidation(email: string) {
+    try {
+      const user = await this.userModel.findOne({
+        email: email,
+      });
+      if (user) {
+        throw new NotFoundException('이미 가입된 이메일입니다.');
+      }
+    } catch (error) {
+      console.error('중복된 이메일입니다.');
       throw error;
     }
   }

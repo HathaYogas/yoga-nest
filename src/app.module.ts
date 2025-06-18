@@ -3,20 +3,24 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
 import { HealthModule } from './health/health.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
     UserModule,
     HealthModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      // 전역적으로 nestjs configuration 사용
+      isGlobal: true,
+    }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       //eslint-disable-next-line
       useFactory: async (configService: ConfigService) => ({
         uri:
-          configService.get<string>('MONGO_URI') || 'mongodb://localhost:27017', //NOTE. env 파일이 없다면, 자동으로 로컬과 연결 시도
+          configService.get<string>('MONGO_URI') || 'mongodb://localhost:27017', // env 파일이 없다면, 자동으로 로컬과 연결 시도
+        dbName: configService.get<string>('MONGO_DB'),
       }),
       inject: [ConfigService],
     }),
@@ -25,22 +29,3 @@ import { HealthModule } from './health/health.module';
   providers: [AppService],
 })
 export class AppModule {}
-
-// @Module({
-//   imports: [MongooseModule.forRootAsync({
-//       imports: [ConfigModule],
-//       inject: [ConfigService],
-//       useFactory: async (configService: ConfigService) => ({
-//           uri: configService.get<string>('MONGO_URI'),
-//           dbName: configService.get<string>('MONGO_DB')
-//       })
-//   }),
-//   ConfigModule.forRoot({
-//     // 전역적으로 nestjs configuration 사용
-//       isGlobal: true,
-//   }),
-//   // ---------------------------------------------------------
-//   UserModule],
-//   controllers: [AppController],
-//   providers: [AppService],
-// })
