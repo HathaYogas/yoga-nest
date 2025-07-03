@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { JoinDto } from './join.dto';
 import { LoginDto } from './login.dto';
 import { UserService } from './user.service';
@@ -32,9 +32,49 @@ export class UserController {
     };
   }
 
-  @Get('email-auth')
+  @Post('email-duplicate')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+      },
+      required: ['email'],
+    },
+  })
+  @ApiOperation({ summary: '이메일 중복 확인' })
+  async emailDuplicate(@Body() dto: { email: string }) {
+    return this.userService.emailDuplicate(dto.email);
+  }
+
+  @Post('email-auth')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+      },
+      required: ['email'],
+    },
+  })
   @ApiOperation({ summary: '인증 메일 전송' })
-  async emailAuth() {
-    return this.userService.emailAuth();
+  async emailAuth(@Body() dto: { email: string }) {
+    return this.userService.emailAuth(dto.email);
+  }
+
+  @Post('email-validate')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        code: { type: 'string' },
+      },
+      required: ['email', 'code'],
+    },
+  })
+  @ApiOperation({ summary: '인증 번호 확인' })
+  emailValidate(@Body() dto: { email: string; code: string }) {
+    return this.userService.emailValidate(dto.email, dto.code);
   }
 }

@@ -47,6 +47,8 @@ export class UserService {
       });
       if (user) {
         throw new NotFoundException('이미 가입된 이메일입니다.');
+      } else {
+        await this.emailAuth(joinDto.email);
       }
 
       // bcrypt로 비밀번호 암호화
@@ -64,11 +66,27 @@ export class UserService {
     }
   }
 
-  async emailAuth() {
+  async emailDuplicate(email: string) {
+    try {
+      const user = await this.userModel.findOne({
+        email: email,
+      });
+      if (user) {
+        throw new NotFoundException('이미 가입된 이메일입니다.');
+      } else {
+        return true;
+      }
+    } catch (error) {
+      console.error('오류가 발생했습니다. 확인 후 다시 시도해주세요.');
+      throw error;
+    }
+  }
+
+  async emailAuth(email: string) {
     await this.mailerService
       .sendMail({
         // 이메일 전송 정보
-        to: 'hi_cookie@nate.com',
+        to: email,
         subject: 'Test',
         text: '테스트',
 
@@ -78,7 +96,7 @@ export class UserService {
         // 동적으로 들어갈 변수 정의
         context: {
           code: 'cf1a3f828287',
-          username: 'Yoga',
+          // username: 'Yoga',
         },
       })
       .then((response) => {
@@ -89,17 +107,9 @@ export class UserService {
       });
   }
 
-  async emailValidation(email: string) {
-    try {
-      const user = await this.userModel.findOne({
-        email: email,
-      });
-      if (user) {
-        throw new NotFoundException('이미 가입된 이메일입니다.');
-      }
-    } catch (error) {
-      console.error('중복된 이메일입니다.');
-      throw error;
+  emailValidate(email: string, code: string) {
+    if (code === '0000') {
+      return true;
     }
   }
 }
